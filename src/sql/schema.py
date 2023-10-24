@@ -1,6 +1,7 @@
-from sqlalchemy import BigInteger, Column, ForeignKey, Float, String, DATE, Integer
 from typing import List
-from sqlalchemy.orm import declarative_base, Mapped, relationship, mapped_column
+
+from sqlalchemy import DATE, BigInteger, Column, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 
 Base = declarative_base()
 
