@@ -27,6 +27,7 @@ class Data(Base):
     high: Mapped[Float] = mapped_column(Float)
     low: Mapped[Float] = mapped_column(Float)
     close: Mapped[Float] = mapped_column(Float)
+    adj_close: Mapped[Float] = mapped_column(Float)
     volume: Mapped[Integer] = mapped_column(Integer)
     ticker: Mapped["Ticker"] = relationship(back_populates="datas")
     timeframe: Mapped["Timeframe"] = relationship(back_populates="datas")
