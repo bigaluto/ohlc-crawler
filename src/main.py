@@ -1,4 +1,4 @@
-from .utils.ohlc_fetcher import execute_fetcher, sort_ticker_collection
+from src.core.ohlc_fetcher import execute_fetcher, sort_ticker_collection
 
 if __name__ == "__main__":
     ticker_collection = sort_ticker_collection()
