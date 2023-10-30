@@ -10,6 +10,7 @@ pandas = "^2.1.1"
 SQLAlchemy = "^2.0.22"
 requests = "^2.31.0"
 psycopg2 = "^2.9.9"
+pytz = "^2023.3.post1"
 
 [tool.poetry.dev-dependencies]
 black = "^23.10.1"

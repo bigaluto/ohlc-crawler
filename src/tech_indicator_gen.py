@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .utils.tech_indicator import (
+from src.core.tech_indicator import (
     generate_bollinger_band,
     generate_ema,
     generate_ma,
@@ -23,8 +23,8 @@ def generate_tech_indicator(df: pd.DataFrame) -> pd.DataFrame:
     generate_modified_stochastic_oscillator(df, 14)
     generate_modified_stochastic_oscillator(df, 60)
     generate_modified_stochastic_oscillator(df, 233)
-    generate_bollinger_band(df, 21, 2, 'blue')
-    generate_bollinger_band(df, 34, 2, 'red')
-    generate_bollinger_band(df, 55, 2, 'green')
+    generate_bollinger_band(df, 21, 2, "blue")
+    generate_bollinger_band(df, 34, 2, "red")
+    generate_bollinger_band(df, 55, 2, "green")
 
     return df
