@@ -1,3 +1,4 @@
+import asyncio
 import calendar
 import datetime as dt
 import json
@@ -6,9 +7,11 @@ import time
 import pandas as pd
 import requests
 from sqlalchemy import desc, select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from src.constants import YAHOO_FINANCE_API
+from src.core.batch_compiler import create_ticker_batches
 from src.sql.ohlc_db_connection import ohlc_database
 from src.sql.schema import OHLCData, Ticker, Timeframe
 
@@ -46,10 +49,6 @@ def insert_ohlc_data(df: pd.DataFrame, ticker_id: int, timeframe_win: str):
 
             session.flush()
 
-            # data_to_insert = session.query(
-            #         Data.date, Data.ticker_id, Data.time_frame_id
-            #     ).filter_by(ticker=ticker_id).order_by(desc('date')).first()
-
             data_list = []
             for row in df.itertuples():
                 data = OHLCData(
@@ -72,19 +71,16 @@ def insert_ohlc_data(df: pd.DataFrame, ticker_id: int, timeframe_win: str):
             print(f"Error on: {ticker_id}")
 
 
-def prepare_ticker_collection(tickers: list[str]):
-    with Session(ohlc_database.engine) as session:
-        ticker_objs = session.scalars(
-            select(Ticker).filter(Ticker.name.in_(tickers))
-        ).all()
-        ticker_collection = {}
-
-        for _, ticker_obj in enumerate(ticker_objs):
-            latest_date = ohlc_database.select(
-                session,
-                OHLCData.date,
-                {"ticker_id": ticker_obj.id},
-                [desc(OHLCData.date)],
+async def get_tickers_last_date(ticker_obj):
+    async with AsyncSession(ohlc_database.async_engine) as session:
+        async with session.begin():
+            latest_date = (
+                await ohlc_database.async_select(
+                    session,
+                    OHLCData.date,
+                    {"ticker_id": ticker_obj.id},
+                    [desc(OHLCData.date)],
+                )
             ).first()
 
             latest_date = (
@@ -93,10 +89,33 @@ def prepare_ticker_collection(tickers: list[str]):
                 else str(dt.datetime(2000, 1, 1))
             )
 
-            if latest_date in ticker_collection:
-                ticker_collection[latest_date].append((ticker_obj.id, ticker_obj.name))
-            else:
-                ticker_collection[latest_date] = [(ticker_obj.id, ticker_obj.name)]
+        return [latest_date, (ticker_obj.id, ticker_obj.name)]
+
+
+async def prepare_ticker_collection(tickers: list[str]):
+    with Session(ohlc_database.engine) as session:
+        ticker_objs = session.scalars(
+            select(Ticker).filter(Ticker.name.in_(tickers))
+        ).all()
+
+        ticker_collection = {}
+
+        ticker_batch_list = create_ticker_batches(ticker_objs)  # type: ignore
+        for ticker_batch in ticker_batch_list:
+            ticker_batch_tasks = [
+                asyncio.create_task(get_tickers_last_date(ticker))
+                for ticker in ticker_batch
+            ]
+
+            results = await asyncio.gather(*ticker_batch_tasks)
+
+            for result in results:
+                latest_date = result[0]
+                ticker_obj = result[1]
+                if result[0] in ticker_collection:
+                    ticker_collection[latest_date].append(ticker_obj)
+                else:
+                    ticker_collection[latest_date] = [ticker_obj]
 
     return ticker_collection
 
@@ -148,15 +167,15 @@ def execute_fetcher(
                 print(f"Data issues for identifier: {ticker_id}")
 
     print(all_errors)
+    # await ohlc_database.async_engine.dispose()
 
 
-def sort_ticker_collection() -> dict[str, list[tuple[int, str]]]:
+async def sort_ticker_collection() -> dict[str, list[tuple[int, str]]]:
     t1 = dt.datetime.now()
     with open("identifiers.json", "r") as f:
         tickers = json.load(f)
 
-    ticker_collection = prepare_ticker_collection(tickers)
+    ticker_collection = await prepare_ticker_collection(tickers)
 
-    print(ticker_collection)
     print(f"Time taken: {dt.datetime.now() - t1}")
     return ticker_collection

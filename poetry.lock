@@ -1,4 +1,24 @@
 [[package]]
+name = "asyncio"
+version = "3.4.3"
+description = "reference implementation of PEP 3156"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "asyncpg"
+version = "0.28.0"
+description = "An asyncio PostgreSQL driver"
+category = "main"
+optional = false
+python-versions = ">=3.7.0"
+
+[package.extras]
+docs = ["Sphinx (>=5.3.0,<5.4.0)", "sphinxcontrib-asyncio (>=0.3.0,<0.4.0)", "sphinx-rtd-theme (>=1.2.2)"]
+test = ["flake8 (>=5.0,<6.0)", "uvloop (>=0.15.3)"]
+
+[[package]]
 name = "black"
 version = "23.10.1"
 description = "The uncompromising code formatter."
@@ -81,6 +101,14 @@ name = "mypy-extensions"
 version = "1.0.0"
 description = "Type system extensions for programs checked with the mypy type checker."
 category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
+name = "nest-asyncio"
+version = "1.5.8"
+description = "Patch asyncio to allow nested event loops"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -292,9 +320,11 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "5d10fb51e9a342da1fc806d5cfd1d15d3fae844114fef3e67fd608dd708274cd"
+content-hash = "a94f336cb4595c9364ae260565e4c92d63a9dc06377c6010bc3d629ec868d50a"
 
 [metadata.files]
+asyncio = []
+asyncpg = []
 black = []
 certifi = []
 charset-normalizer = []
@@ -303,6 +333,7 @@ colorama = []
 greenlet = []
 idna = []
 mypy-extensions = []
+nest-asyncio = []
 numpy = []
 packaging = []
 pandas = []

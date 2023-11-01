@@ -11,6 +11,9 @@ SQLAlchemy = "^2.0.22"
 requests = "^2.31.0"
 psycopg2 = "^2.9.9"
 pytz = "^2023.3.post1"
+asyncio = "^3.4.3"
+nest-asyncio = "^1.5.8"
+asyncpg = "^0.28.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.10.1"
